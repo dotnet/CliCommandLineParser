@@ -95,7 +95,8 @@ namespace Microsoft.DotNet.Cli.CommandLine.SampleParsers.Dotnet
                                .With(name: "CONFIGURATION")));
 
         private static Command List() =>
-            Command("list", "",
+            Command("list", 
+                    ".NET List Command",
                     ExactlyOneArgument()
                         .With(name: "PROJECT",
                               description:
