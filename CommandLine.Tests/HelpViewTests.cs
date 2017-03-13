@@ -4,6 +4,7 @@
 using System;
 using FluentAssertions;
 using Xunit;
+using Xunit.Abstractions;
 using static System.Environment;
 using static Microsoft.DotNet.Cli.CommandLine.Accept;
 using static Microsoft.DotNet.Cli.CommandLine.Create;
@@ -12,6 +13,13 @@ namespace Microsoft.DotNet.Cli.CommandLine.Tests
 {
     public class HelpViewTests
     {
+        private readonly ITestOutputHelper output;
+
+        public HelpViewTests(ITestOutputHelper output)
+        {
+            this.output = output;
+        }
+
         [Fact]
         public void Help_can_be_displayed_for_a_specific_invalid_command()
         {
@@ -186,6 +194,23 @@ namespace Microsoft.DotNet.Cli.CommandLine.Tests
             command.HelpView()
                    .Should()
                    .Contain("  -v, --verbosity <LEVEL>           Sets the verbosity.");
+        }
+
+        [Fact]
+        public void If_arguments_have_descriptions_then_there_is_an_arguments_section()
+        {
+            var command = Command("the-command", "The help text for the command",
+                                  ZeroOrOneArgument()
+                                      .With(name: "the-command-arg",
+                                            description: "This is the argument for the command."),
+                                  Option("-o|--one", "The first option"));
+
+            var helpView = command.HelpView();
+
+            output.WriteLine(helpView);
+
+            helpView.Should()
+                    .Contain($"Arguments:{NewLine}  <the-command-arg>  This is the argument for the command.");
         }
     }
 }

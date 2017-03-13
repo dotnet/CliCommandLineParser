@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -21,6 +22,13 @@ namespace Microsoft.DotNet.Cli.CommandLine
 
         public static string HelpView(this Command command)
         {
+            var helpView = new StringBuilder();
+
+            if (!string.IsNullOrWhiteSpace(command.HelpText))
+            {
+                helpView.AppendLine(command.HelpText);
+            }
+
             var options = command.DefinedOptions.ToArray();
 
             options = options
@@ -28,58 +36,101 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 .Where(o => !o.IsHidden())
                 .ToArray();
 
-            var s = new StringBuilder();
+            WriteUsageSummary(command, options, helpView);
 
-            if (!string.IsNullOrWhiteSpace(command.HelpText))
+            WriteOptionsSection(options, helpView);
+
+            WriteArgumentsSection(command, helpView);
+
+            WriteSubcommandsSection(command, helpView);
+
+            return helpView.ToString();
+        }
+
+        private static void WriteArgumentsSection(
+            Command command,
+            StringBuilder helpView)
+        {
+            var name = command.ArgumentsRule.Name;
+            var description = command.ArgumentsRule.Description;
+
+            if (string.IsNullOrWhiteSpace(name) ||
+                string.IsNullOrWhiteSpace(description))
             {
-                s.AppendLine(command.HelpText);
+                return;
             }
 
-            s.Append("Usage: ");
+            helpView.AppendLine();
+            helpView.AppendLine("Arguments:");
+            helpView.AppendLine($"  <{name}>  {description}");
 
-            s.Append(command.FullyQualifiedName());
+        }
 
-            if (options.Any())
-            {
-                s.Append(" [options]");
-            }
-
-            var argumentName = command.ArgumentsRule.Name;
-            if (!string.IsNullOrWhiteSpace(argumentName))
-            {
-                s.Append($" [{argumentName}]");
-            }
-
-            s.AppendLine();
-
-            if (options.Any())
-            {
-                s.AppendLine();
-                s.AppendLine("Options:");
-                s.AppendLine();
-
-                foreach (var option in options)
-                {
-                    WriteHelpSummary(option, s);
-                }
-            }
-
+        private static void WriteSubcommandsSection(
+            Command command, 
+            StringBuilder helpView)
+        {
             var subcommands = command
                 .DefinedOptions
                 .OfType<Command>()
                 .ToArray();
 
-            if (subcommands.Any())
+            if (!subcommands.Any())
             {
-                s.AppendLine();
-                s.AppendLine("Commands:");
-                foreach (var subcommand in subcommands)
+                return;
+            }
+
+            helpView.AppendLine();
+            helpView.AppendLine("Commands:");
+
+            foreach (var subcommand in subcommands)
+            {
+                WriteHelpSummary(subcommand, helpView);
+            }
+        }
+
+        private static void WriteOptionsSection(
+            IReadOnlyCollection<Option> options, 
+            StringBuilder helpView)
+        {
+            if (!options.Any())
+            {
+                return;
+            }
+
+            helpView.AppendLine();
+            helpView.AppendLine("Options:");
+
+            foreach (var option in options)
+            {
+                WriteHelpSummary(option, helpView);
+            }
+        }
+
+        private static void WriteUsageSummary(
+            Command command, 
+            IReadOnlyCollection<Option> options,
+            StringBuilder helpView)
+        {
+            helpView.Append("Usage:");
+
+            foreach (var c in command.RecurseWhileNotNull(c => c.Parent as Command)
+                                     .Reverse())
+            {
+                helpView.Append($" {c.Name}");
+                var argsName = c.ArgumentsRule.Name;
+                if (!string.IsNullOrWhiteSpace(argsName))
                 {
-                    WriteHelpSummary(subcommand, s);
+                    helpView.Append($" [{argsName}]");
                 }
             }
 
-            return s.ToString();
+            if (options.Any())
+            {
+                helpView.Append(" [options]");
+            }
+
+            helpView.AppendLine();
         }
 
         public static string HelpView(this Option option)
@@ -90,14 +141,16 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 return command.HelpView();
             }
 
-            var s = new StringBuilder();
+            var helpView = new StringBuilder();
 
-            WriteHelpSummary(option, s);
+            WriteHelpSummary(option, helpView);
 
-            return s.ToString();
+            return helpView.ToString();
         }
 
-        private static void WriteHelpSummary(Option option, StringBuilder s)
+        private static void WriteHelpSummary(
+            Option option, 
+            StringBuilder helpView)
         {
             var aliases = "    " +
                           string.Join(", ",
@@ -116,21 +169,21 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 aliases += $" <{argumentName}>";
             }
 
-            s.Append(aliases);
+            helpView.Append(aliases);
 
             var colWidth = 38;
 
             if (aliases.Length <= colWidth - 2)
             {
-                s.Append(new string(' ', colWidth - aliases.Length));
+                helpView.Append(new string(' ', colWidth - aliases.Length));
             }
             else
             {
-                s.AppendLine();
-                s.Append(new string(' ', colWidth));
+                helpView.AppendLine();
+                helpView.Append(new string(' ', colWidth));
             }
 
-            s.AppendLine(option.HelpText
+            helpView.AppendLine(option.HelpText
                                .Replace(Environment.NewLine,
                                         Environment.NewLine + new string(' ', colWidth)));
         }
