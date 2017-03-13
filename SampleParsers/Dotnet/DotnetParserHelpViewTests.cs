@@ -44,10 +44,6 @@ namespace Microsoft.DotNet.Cli.CommandLine.SampleParsers.Dotnet
         {
             var result = dotnet.Parse(commandLine);
 
-//            output.WriteLine("DIAGRAM");
-//            output.WriteLine(result.Diagram() + Environment.NewLine);
-//
-//            output.WriteLine("HELP");
             var helpView = result.Command().HelpView();
             output.WriteLine(helpView);
 
