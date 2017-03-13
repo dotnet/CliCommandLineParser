@@ -222,11 +222,9 @@ namespace Microsoft.DotNet.Cli.CommandLine.Tests
                                             description: "This is the argument for the command.")
                                   , Option("-o|--one", "The first option"));
 
-            var helpView = command.HelpView();
+            var helpView = command.HelpView(model => template(model));
 
-            var template = "BEFORE{Command}AFTER";
-
-            output.WriteLine(helpView, template);
+            output.WriteLine(helpView);
 
 
 
