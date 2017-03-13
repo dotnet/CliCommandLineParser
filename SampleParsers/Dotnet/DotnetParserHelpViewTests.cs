@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Cli.CommandLine.SampleParsers.Dotnet
             this.output = output;
         }
 
-        [Theory(Skip="work in progress")]
+        [Theory]
         [InlineData("dotnet -h")]
         [InlineData("dotnet add -h")]
         [InlineData("dotnet add package -h")]
@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Cli.CommandLine.SampleParsers.Dotnet
         [InlineData("dotnet migrate -h")]
         //        [InlineData("dotnet msbuild -h")]
         [InlineData("dotnet new -h")]
-//        [InlineData("dotnet nuget -h")]
+        //        [InlineData("dotnet nuget -h")]
         [InlineData("dotnet pack -h")]
         [InlineData("dotnet publish -h")]
         [InlineData("dotnet remove -h")]

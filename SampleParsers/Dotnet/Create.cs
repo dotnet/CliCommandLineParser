@@ -364,19 +364,19 @@ namespace Microsoft.DotNet.Cli.CommandLine.SampleParsers.Dotnet
         private static Command Sln() =>
             Command("sln",
                     ".NET modify solution file command",
+                    ExactlyOneArgument()
+                        .With(name: "SLN_FILE"),
                     HelpOption(),
                     Command("add",
                             ".NET Add project(s) to a solution file Command",
-                            ExactlyOneArgument()
-                                .With(name: "SLN_FILE"),
+                            OneOrMoreArguments(),
                             HelpOption()),
                     Command("list",
                             "List all projects in the solution.",
-                            ExactlyOneArgument()
-                                .With(name: "SLN_FILE"),
                             HelpOption()),
                     Command("remove",
-                            "Remove the specified project(s) from the solution. The project is not impacted."));
+                            "Remove the specified project(s) from the solution. The project is not impacted.",
+                            OneOrMoreArguments()));
 
         private static Command Test() =>
             Command("test",

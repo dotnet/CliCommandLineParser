@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Cli.CommandLine.Tests
 
             helpView
                 .Should()
-                .Contain("Usage: the-command [options] [the-args]");
+                .Contain("Usage: the-command [the-args] [options]");
         }
 
         [Fact]
