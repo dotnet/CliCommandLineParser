@@ -8,6 +8,15 @@ using System.Text;
 
 namespace Microsoft.DotNet.Cli.CommandLine
 {
+    public class HelpViewModel
+    {
+        private readonly Command command;
+
+        public HelpViewModel(Command command) => this.command = command ?? throw new ArgumentNullException(nameof(command));
+
+
+    }
+
     public static class ParserExtensions
     {
         public static string HelpView(this Parser parser) =>
@@ -63,11 +72,10 @@ namespace Microsoft.DotNet.Cli.CommandLine
             helpView.AppendLine();
             helpView.AppendLine("Arguments:");
             helpView.AppendLine($"  <{name}>  {description}");
-
         }
 
         private static void WriteSubcommandsSection(
-            Command command, 
+            Command command,
             StringBuilder helpView)
         {
             var subcommands = command
@@ -90,7 +98,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
         }
 
         private static void WriteOptionsSection(
-            IReadOnlyCollection<Option> options, 
+            IReadOnlyCollection<Option> options,
             StringBuilder helpView)
         {
             if (!options.Any())
@@ -108,7 +116,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
         }
 
         private static void WriteUsageSummary(
-            Command command, 
+            Command command,
             IReadOnlyCollection<Option> options,
             StringBuilder helpView)
         {
@@ -149,7 +157,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
         }
 
         private static void WriteHelpSummary(
-            Option option, 
+            Option option,
             StringBuilder helpView)
         {
             var aliases = "    " +
@@ -184,8 +192,8 @@ namespace Microsoft.DotNet.Cli.CommandLine
             }
 
             helpView.AppendLine(option.HelpText
-                               .Replace(Environment.NewLine,
-                                        Environment.NewLine + new string(' ', colWidth)));
+                                      .Replace(Environment.NewLine,
+                                               Environment.NewLine + new string(' ', colWidth)));
         }
 
         public static ParseResult Parse(this Parser parser, string s) =>

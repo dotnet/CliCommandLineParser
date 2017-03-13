@@ -212,5 +212,28 @@ namespace Microsoft.DotNet.Cli.CommandLine.Tests
             helpView.Should()
                     .Contain($"Arguments:{NewLine}  <the-command-arg>  This is the argument for the command.");
         }
+
+        [Fact]
+        public void HelpView_can_be_templated()
+        {
+            var command = Command("the-command", "The help text for the command",
+                                  ZeroOrOneArgument()
+                                      .With(name: "the-command-arg",
+                                            description: "This is the argument for the command.")
+                                  , Option("-o|--one", "The first option"));
+
+            var helpView = command.HelpView();
+
+            var template = "BEFORE{Command}AFTER";
+
+            output.WriteLine(helpView, template);
+
+
+
+
+
+            // TODO-JOSEQU (HelpView_can_be_templated) write test
+            Assert.True(false, "Test HelpView_can_be_templated is not written yet.");
+        }
     }
 }
