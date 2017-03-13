@@ -23,33 +23,33 @@ namespace Microsoft.DotNet.Cli.CommandLine.Tests
         [Fact]
         public void Help_can_be_displayed_for_a_specific_invalid_command()
         {
-            var parser = new Parser(
-                Command("the-command",
-                        "Does the thing.",
-                        ExactlyOneArgument()));
+            var command = Command("the-command",
+                                  "Does the thing.",
+                                  ExactlyOneArgument());
+            var parser = new Parser(command);
 
             var result = parser.Parse("the-command");
 
             result.Execute()
                   .ToString()
                   .Should()
-                  .Be($"Required argument missing for command: the-command{NewLine}{parser.HelpView()}");
+                  .Be($"Required argument missing for command: the-command{NewLine}{command.HelpView()}");
         }
 
         [Fact]
         public void Help_can_be_displayed_for_a_specific_invalid_option()
         {
-            var parser = new Parser(
-                Command("the-command",
-                        "Does the thing.",
-                        Option("-x", "Specifies value x", ExactlyOneArgument())));
+            var command = Command("the-command",
+                                  "Does the thing.",
+                                  Option("-x", "Specifies value x", ExactlyOneArgument()));
+            var parser = new Parser(command);
 
             var result = parser.Parse("the-command -x");
 
             result.Execute()
                   .ToString()
                   .Should()
-                  .Be($"Required argument missing for option: -x{NewLine}{parser.HelpView()}");
+                  .Be($"Required argument missing for option: -x{NewLine}{command.HelpView()}");
         }
 
         [Fact]
@@ -222,7 +222,7 @@ namespace Microsoft.DotNet.Cli.CommandLine.Tests
                                             description: "This is the argument for the command.")
                                   , Option("-o|--one", "The first option"));
 
-            var helpView = command.HelpView(model => template(model));
+            var helpView = command.HelpView();
 
             output.WriteLine(helpView);
 
