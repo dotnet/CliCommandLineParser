@@ -184,9 +184,12 @@ namespace Microsoft.DotNet.Cli.CommandLine
                 helpView.Append(new string(' ', colWidth));
             }
 
-            helpView.AppendLine(option.HelpText
-                                      .Replace(Environment.NewLine,
-                                               Environment.NewLine + new string(' ', colWidth)));
+            helpView.AppendLine(
+                string.Join(
+                    Environment.NewLine + new string(' ', colWidth), option
+                        .HelpText
+                        .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(s => s.Trim())));
         }
     }
 }

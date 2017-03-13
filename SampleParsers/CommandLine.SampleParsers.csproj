@@ -86,7 +86,7 @@
     <Compile Include="Dotnet\DotnetParserHelpViewTests.cs" />
     <Compile Include="Dotnet\SuggestionTests.cs" />
     <Compile Include="Dotnet\DotnetParserTests.cs" />
-    <Compile Include="Dotnet\Create.cs" />
+    <Compile Include="Dotnet\DotNetParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
