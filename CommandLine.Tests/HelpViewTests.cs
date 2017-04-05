@@ -303,5 +303,17 @@ namespace Microsoft.DotNet.Cli.CommandLine.Tests
 
             helpView.Should().Contain("Usage: some-command [options] [[--] <additional arguments>...]]");
         }
+
+        [Fact]
+        public void When_option_alias_separator_is_provided_it_is_used()
+        {
+            var command = Command("command", "Help text",
+                Option("-l|--list", "Help for list option"),
+                Option("-a|--all", "Help for all option"));
+            HelpViewOptions helpViewOptions = new HelpViewOptions("| ");
+            var helpView = command.HelpView(helpViewOptions);
+            helpView.Should().Contain("-l| --list");
+            helpView.Should().Contain("-a| --all");
+        }
     }
 }
