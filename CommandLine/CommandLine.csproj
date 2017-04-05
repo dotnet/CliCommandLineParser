@@ -42,6 +42,7 @@
     <Compile Include="CommandExecutionResult.cs" />
     <Compile Include="DefaultHelpViewText.cs" />
     <Compile Include="HelpViewExtensions.cs" />
+    <Compile Include="HelpViewOptions.cs" />
     <Compile Include="OptionSet{T}.cs" />
     <Compile Include="ParseException.cs" />
     <Compile Include="ParserConfiguration.cs" />

@@ -10,11 +10,16 @@ namespace Microsoft.DotNet.Cli.CommandLine
     {
         private static int columnGutterWidth = 3;
 
-        public static string HelpView(this Command command)
+        public static string HelpView(this Command command, HelpViewOptions helpViewOptions = null)
         {
             if (command == null)
             {
                 throw new ArgumentNullException(nameof(command));
+            }
+
+            if (helpViewOptions == null)
+            {
+                helpViewOptions = HelpViewOptions.Default;
             }
 
             var helpView = new StringBuilder();
@@ -29,9 +34,9 @@ namespace Microsoft.DotNet.Cli.CommandLine
 
             WriteArgumentsSection(command, helpView);
 
-            WriteOptionsSection(command, helpView);
+            WriteOptionsSection(command, helpView, helpViewOptions);
 
-            WriteSubcommandsSection(command, helpView);
+            WriteSubcommandsSection(command, helpView, helpViewOptions);
 
             WriteAdditionalArgumentsSection(command, helpView);
 
@@ -110,7 +115,8 @@ namespace Microsoft.DotNet.Cli.CommandLine
 
         private static void WriteOptionsSection(
             Command command,
-            StringBuilder helpView)
+            StringBuilder helpView,
+            HelpViewOptions helpViewOptions)
         {
             var options = command
                 .DefinedOptions
@@ -126,12 +132,13 @@ namespace Microsoft.DotNet.Cli.CommandLine
             helpView.AppendLine();
             helpView.AppendLine(OptionsSection.Title);
 
-            WriteOptionsList(options, helpView);
+            WriteOptionsList(options, helpView, helpViewOptions);
         }
 
         private static void WriteSubcommandsSection(
             Command command,
-            StringBuilder helpView)
+            StringBuilder helpView,
+            HelpViewOptions helpViewOptions)
         {
             var subcommands = command
                 .DefinedOptions
@@ -147,15 +154,16 @@ namespace Microsoft.DotNet.Cli.CommandLine
             helpView.AppendLine();
             helpView.AppendLine(CommandsSection.Title);
 
-            WriteOptionsList(subcommands, helpView);
+            WriteOptionsList(subcommands, helpView, helpViewOptions);
         }
 
         private static void WriteOptionsList(
             Option[] options,
-            StringBuilder helpView)
+            StringBuilder helpView,
+            HelpViewOptions helpViewOptions)
         {
             var leftColumnTextFor = options
-                .ToDictionary(o => o, LeftColumnText);
+                .ToDictionary(o => o, o => LeftColumnText(o, helpViewOptions));
 
             var leftColumnWidth = leftColumnTextFor
                                       .Values
@@ -172,10 +180,10 @@ namespace Microsoft.DotNet.Cli.CommandLine
             }
         }
 
-        private static string LeftColumnText(Option option)
+        private static string LeftColumnText(Option option, HelpViewOptions helpViewOptions)
         {
             var leftColumnText = "  " +
-                                 string.Join(", ",
+                                 string.Join(helpViewOptions.OptionAliasSeparator,
                                              option.Aliases
                                                    .OrderBy(a => a.Length)
                                                    .Select(a =>
