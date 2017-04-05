@@ -303,5 +303,36 @@ namespace Microsoft.DotNet.Cli.CommandLine.Tests
 
             helpView.Should().Contain("Usage: some-command [options] [[--] <additional arguments>...]]");
         }
+
+        [Fact]
+        public void Retain_single_dash_on_multi_char_option_when_display_raw_aliases_is_specified()
+        {
+            var command = Command("command", "Help Test",
+                    Option("-multi|--alt-option", "Help for option"));
+            HelpViewOptions helpViewOptions = new HelpViewOptions(true);
+            var helpView = command.HelpView(helpViewOptions);
+            helpView.Should().Contain("-multi");
+            helpView.Should().NotContain("--multi");
+        }
+
+        [Fact]
+        public void Retain_multiple_dashes_on_single_char_option_when_display_raw_aliases_is_specified()
+        {
+            var command = Command("command", "Help Test",
+                    Option("--m|--alt-option", "Help for option"));
+            HelpViewOptions helpViewOptions = new HelpViewOptions(true);
+            var helpView = command.HelpView(helpViewOptions);
+            helpView.Should().Contain("--m");
+        }
+
+        [Fact]
+        public void Command_display_value_is_not_altered_when_display_raw_aliases_is_specified()
+        {
+            var command = Command("command", "Help Test",
+                    Option("--m|--alt-option", "Help for option"));
+            HelpViewOptions helpViewOptions = new HelpViewOptions(true);
+            var helpView = command.HelpView(helpViewOptions);
+            helpView.Should().NotContain("-command");
+        }
     }
 }
