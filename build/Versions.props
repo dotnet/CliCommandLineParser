@@ -21,7 +21,7 @@
   <PropertyGroup>
     <DotNetCliVersion>1.1.4</DotNetCliVersion>
     <DotNetCliProjectJsonVersion>1.0.0-preview2-1-003177</DotNetCliProjectJsonVersion>
-    <RoslynToolsRepoToolsetVersion>1.0.0-beta-62522-01</RoslynToolsRepoToolsetVersion>
+    <RoslynToolsRepoToolsetVersion>1.0.0-beta-62615-02</RoslynToolsRepoToolsetVersion>
     <VSWhereVersion>2.2.7</VSWhereVersion>
   </PropertyGroup>
 
