@@ -8,7 +8,7 @@
 
   <!-- Repo Version Information -->
   <PropertyGroup>
-    <VersionBase>0.1.1</VersionBase>
+    <VersionBase>0.2.1</VersionBase>
     <PreReleaseVersionLabel>alpha</PreReleaseVersionLabel>
   </PropertyGroup>
 
