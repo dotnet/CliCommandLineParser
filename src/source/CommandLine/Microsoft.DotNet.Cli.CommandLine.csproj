@@ -12,7 +12,6 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <IncludeSymbols>true</IncludeSymbols>
-    <DebugType>portable</DebugType>
   </PropertyGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
