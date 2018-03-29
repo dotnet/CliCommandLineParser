@@ -11,6 +11,7 @@
 
   <PropertyGroup>
     <IsPackable>true</IsPackable>
+    <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
