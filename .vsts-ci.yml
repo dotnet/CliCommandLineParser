@@ -16,7 +16,7 @@ steps:
     esrpSigning: true
   condition: and(succeeded(), eq(variables['PB_SignType'], 'real'))
 
-- script: eng\common\CIBuild.cmd 
+- script: build\CIBuild.cmd 
             -configuration $(BuildConfiguration)
             /p:PB_PublishBlobFeedKey=$(PB_PublishBlobFeedKey)
   displayName: Build
