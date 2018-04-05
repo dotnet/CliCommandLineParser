@@ -1,57 +1,80 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Groovy Script: http://www.groovy-lang.org/syntax.html
+// Jenkins DSL: https://github.com/jenkinsci/job-dsl-plugin/wiki
 
-// Import the utility functionality.
-
-import jobs.generation.ArchivalSettings;
 import jobs.generation.Utilities;
 
-def project = GithubProject
-def branch = GithubBranchName
-
-def static getBuildJobName(def configuration, def os, def architecture) {
-    return configuration.toLowerCase() + '_' + os.toLowerCase() + '_' + architecture.toLowerCase()
+static getJobName(def opsysName, def configName) {
+  return "${opsysName}_${configName}"
 }
 
-['OSX10.12', 'Ubuntu16.04', 'Windows_NT'].each { os ->
-    ['x64'].each { architecture ->
-        ['Debug', 'Release'].each { config ->
-            [true, false].each { isPR ->
-                // Calculate job name
-                def jobName = getBuildJobName(config, os, architecture)
-                def buildCommand = '';
+static addArchival(def job, def filesToArchive, def filesToExclude) {
+  def doNotFailIfNothingArchived = false
+  def archiveOnlyIfSuccessful = false
 
-                def osBase = os
-                def machineAffinity = 'latest-or-auto'
+  Utilities.addArchival(job, filesToArchive, filesToExclude, doNotFailIfNothingArchived, archiveOnlyIfSuccessful)
+}
 
-                def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
-                    // Set the label.
-                    steps {
-                        if (osBase == 'Windows_NT') {
-                            // Batch
-                            batchFile(".\\build\\cibuild.cmd -configuration $config")
-                        }
-                        else {
-                            // Shell
-                            shell("./build/cibuild.sh --configuration $config")
-                        }
-                    }
-                }
+static addGithubPRTriggerForBranch(def job, def branchName, def jobName) {
+  def prContext = "prtest/${jobName.replace('_', '/')}"
+  def triggerPhrase = "(?i)^\\s*(@?dotnet-bot\\s+)?(re)?test\\s+(${prContext})(\\s+please)?\\s*\$"
+  def triggerOnPhraseOnly = false
 
-                Utilities.setMachineAffinity(newJob, osBase, machineAffinity)
-                Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
+  Utilities.addGithubPRTriggerForBranch(job, branchName, prContext, triggerPhrase, triggerOnPhraseOnly)
+}
 
-                if (isPR) {
-                    Utilities.addGithubPRTriggerForBranch(newJob, branch, "$os $architecture $config")
-                }
+static addXUnitDotNETResults(def job, def configName) {
+  def resultFilePattern = "**/artifacts/${configName}/TestResults/*.xml"
+  def skipIfNoTestFiles = false
+    
+  Utilities.addXUnitDotNETResults(job, resultFilePattern, skipIfNoTestFiles)
+}
 
-                def archiveSettings = new ArchivalSettings()
-                archiveSettings.addFiles("artifacts/$config/log/*")
-                archiveSettings.addFiles("artifacts/$config/TestResults/*")
-                archiveSettings.setFailIfNothingArchived()
-                archiveSettings.setArchiveOnFailure()
-                Utilities.addArchival(newJob, archiveSettings)
-            }
-        }
+static addBuildSteps(def job, def projectName, def os, def configName, def isPR) {
+  def buildJobName = getJobName(os, configName)
+  def buildFullJobName = Utilities.getFullJobName(projectName, buildJobName, isPR)
+
+  job.with {
+    steps {
+      if (os == "Windows_NT") {
+        batchFile(""".\\eng\\common\\CIBuild.cmd -configuration ${configName} -prepareMachine""")
+      } else {
+        shell("./eng/common/cibuild.sh --configuration ${configName} --prepareMachine")
+      }
     }
+  }
+}
+
+[true, false].each { isPR ->
+  ['OSX10.12', 'Ubuntu16.04', 'Windows_NT'].each { os ->
+    ['Debug', 'Release'].each { configName ->
+      def projectName = GithubProject
+
+      def branchName = GithubBranchName
+
+      def filesToArchive = "**/artifacts/${configName}/**"
+
+      def jobName = getJobName(os, configName)
+      def fullJobName = Utilities.getFullJobName(projectName, jobName, isPR)
+      def myJob = job(fullJobName)
+
+      Utilities.standardJobSetup(myJob, projectName, isPR, "*/${branchName}")
+
+      if (isPR) {
+        addGithubPRTriggerForBranch(myJob, branchName, jobName)
+      } else {
+        Utilities.addGithubPushTrigger(myJob)
+      }
+      
+      addArchival(myJob, filesToArchive, "")
+      addXUnitDotNETResults(myJob, configName)
+
+      if (os == 'Windows_NT') {
+        Utilities.setMachineAffinity(myJob, os, 'latest-dev15-3')  
+      } else {
+        Utilities.setMachineAffinity(myJob, os, 'latest-or-auto')
+      }
+
+      addBuildSteps(myJob, projectName, os, configName, isPR)
+    }
+  }
 }

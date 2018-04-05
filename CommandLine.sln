@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLine.Tests", "src\te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet", "src\xamples\dotnet\dotnet.csproj", "{C93310CF-0A00-4A62-BDA2-596FAAE2B1DB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLine.SampleParsers", "src\xamples\SampleParsers\CommandLine.SampleParsers.csproj", "{CD03109D-3909-4B66-9E59-1125F8197193}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommandLine.SampleParsers.Tests", "src\xamples\SampleParsers\CommandLine.SampleParsers.Tests.csproj", "{CD03109D-3909-4B66-9E59-1125F8197193}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
