@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <OutDirName>Samples\$(MSBuildProjectName)</OutDirName>
     <PublishOutputToSymStore>false</PublishOutputToSymStore>
+    <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
   </PropertyGroup>
 
   <ItemGroup>
