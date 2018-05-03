@@ -174,7 +174,7 @@ function InstallDotNetSdk {
 
   local install_script=`GetDotNetInstallScript $root`
 
-  bash "$install_script" --version $version
+  bash "$install_script" --version $version --install-dir $root
   local lastexitcode=$?
 
   if [[ $lastexitcode != 0 ]]; then
@@ -232,6 +232,11 @@ function InitializeToolset {
   fi
 
   toolset_build_proj=`cat $toolset_location_file`
+
+  if [[ ! -a "$toolset_build_proj" ]]; then
+    echo "Invalid toolset path: $toolset_build_proj"
+    ExitWithExitCode 3
+  fi
 }
 
 function InitializeCustomToolset {
