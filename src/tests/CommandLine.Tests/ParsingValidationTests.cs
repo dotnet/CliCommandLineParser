@@ -99,7 +99,7 @@ namespace Microsoft.DotNet.Cli.CommandLine.Tests
                 .Contain("Options '--one' and '--two' cannot be used together.");
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/CliCommandLineParser/issues/108")]
         public void LegalFilePathsOnly_rejects_arguments_containing_invalid_path_characters()
         {
             var command = Command("the-command", "",
