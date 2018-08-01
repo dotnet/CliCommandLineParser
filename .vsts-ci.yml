@@ -1,64 +1,56 @@
-resources:
-  repo: self
-  clean: true
-queue:
-  name: VSEng-MicroBuildVS2017
-  demands: Cmd
-variables:
-  TeamName: 'Roslyn-Project-System'
-  BuildConfiguration: Release
-#Your build pipeline references the ‘PB_SignType’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
-#Your build pipeline references a secret variable named ‘PB_PublishBlobFeedKey’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it secret. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references a secret variable named ‘PB_PublishBlobFeedUrl’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it secret. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references the ‘BuildConfiguration’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
-#Your build pipeline references the ‘BuildPlatform’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
+phases:
+- template: /eng/build.yml
+  parameters:
+    agentOs: Windows_NT
+    queue:
+      ${{ if in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:
+        name: Hosted VS2017
+      ${{ if notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:        
+        name: DotNetCore-Build
+        demands:
+        - agent.os -equals Windows_NT        
+      parallel: 2
+      matrix:
+        Build_Debug:
+          _BuildConfig: Debug
+          _PublishType: none
+          _SignType: test
+        Build_Release:
+          _BuildConfig: Release
+          ${{ if in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:
+            _PublishType: none
+            _SignType: test
+            PB_PublishBlobFeedKey:
+            PB_PublishBlobFeedUrl:
+          ${{ if notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:
+            _PublishType: blob
+            _SignType: real
 
-steps:
-- task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
-  displayName: Install Signing Plugin
-  inputs:
-    signType: '$(PB_SignType)'
-  condition: and(succeeded(), in(variables['PB_SignType'], 'real', 'test'))
 
-- script: build\CIBuild.cmd 
-            -configuration $(BuildConfiguration)
-            /p:PB_PublishBlobFeedKey=$(PB_PublishBlobFeedKey)
-            /p:PB_PublishBlobFeedUrl=$(PB_PublishBlobFeedUrl)
-  displayName: Build
+- template: /eng/build.yml
+  parameters:
+    agentOs: Linux
+    dockerImage: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
+    queue: 
+      ${{ if in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:
+        name: DotNetCore-Linux
+      ${{ if notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:        
+        name: DotNetCore-Test
+      demands:
+        - agent.os -equals Linux
+      parallel: 2
+      matrix:
+        Build_Debug:
+          _BuildConfig: Debug
+          _PublishType: none
+          _SignType: test
+        Build_Release:
+          _BuildConfig: Release
+          _PublishType: none
+          ${{ if in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:
+            _SignType: test
+            PB_PublishBlobFeedKey:
+            PB_PublishBlobFeedUrl:
+          ${{ if notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:
+            _SignType: real
 
-
-- task: PublishTestResults@1
-  displayName: Publish Test Results
-  inputs:
-    testRunner: XUnit
-    testResultsFiles: '**\*.xml'
-    searchFolder: '$(Build.SourcesDirectory)\artifacts\$(BuildConfiguration)\TestResults'
-    testRunTitle: 'Unit Test Results'
-    platform: '$(BuildPlatform)'
-    configuration: '$(BuildConfiguration)'
-  condition: and(succeededOrFailed(), ne(variables['PB_SkipTests'], 'true'))
-
-- task: CopyFiles@2
-  displayName: Stage Build Artifacts
-  inputs:
-    SourceFolder: '$(Build.SourcesDirectory)'
-    Contents: |
-     artifacts\$(BuildConfiguration)\bin\**\*
-     artifacts\$(BuildConfiguration)\log\**\*
-     artifacts\$(BuildConfiguration)\packages\**\*
-     artifacts\$(BuildConfiguration)\TestResults\**\*
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
-  condition: and(succeededOrFailed(), in(variables['PB_PublishType'], 'drop', 'blob'))
-
-- task: PublishBuildArtifacts@1
-  displayName: Publish Build Artifacts
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)\artifacts\$(BuildConfiguration)'
-    ArtifactName: '$(Build.BuildNumber)'
-    publishLocation: FilePath
-    TargetPath: '$(DropRoot)\$(TeamName)\$(Build.DefinitionName)'
-  condition: and(succeededOrFailed(), in(variables['PB_PublishType'], 'drop', 'blob'))
-
-- task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
-  displayName: Perform Cleanup Tasks
-  condition: always()
