@@ -45,7 +45,7 @@ phases:
             _PublishType: blob
             _SignType: real
 
- ${{ if in(variables['Build.Reason'], 'PullRequest') }}:
+- ${{ if in(variables['Build.Reason'], 'PullRequest') }}:
   - template: /eng/build.yml
     parameters:
       agentOs: Linux
