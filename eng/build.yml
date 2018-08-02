@@ -15,29 +15,33 @@ phases:
       - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
         displayName: Install Signing Plugin
         inputs:
-          signType: '$(PB_SignType)'
-        condition: and(succeeded(), in(variables['PB_SignType'], 'real', 'test'))
+          signType: '$(_SignType)'
+        condition: and(succeeded(), in(variables['_SignType'], 'real', 'test'))
+      - task: AzureKeyVault@1
+        inputs:
+          azureSubscription: 'DotNet-Engineering-Services_KeyVault'
+          KeyVaultName: EngKeyVault
+          SecretsFilter: 'dotnetfeed-storage-access-key-1'
+        condition: succeeded()
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
       - script: build\CIBuild.cmd 
                   -configuration %BuildConfig%
-                  /p:PB_PublishBlobFeedKey=%BlobFeedKey%
+                  /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
                   /p:PB_PublishBlobFeedUrl=%BlobFeedUrl%
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
-          BlobFeedKey: $(PB_PublishBlobFeedKey)
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
 
     - ${{ if ne(parameters.agentOs, 'Windows_NT') }}:
       - script: build/cibuild.sh 
                   --configuration $BuildConfig
-                  /p:PB_PublishBlobFeedKey=$BlobFeedKey
+                  /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
                   /p:PB_PublishBlobFeedUrl=$BlobFeedUrl
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
-          BlobFeedKey: $(PB_PublishBlobFeedKey)
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
 
     - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
@@ -62,7 +66,7 @@ phases:
            artifacts\$(_BuildConfig)\packages\**\*
            artifacts\$(_BuildConfig)\TestResults\**\*
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
-        condition: and(succeededOrFailed(), in(variables['PB_PublishType'], 'drop', 'blob'))
+        condition: and(succeededOrFailed(), in(variables['_PublishType'], 'drop', 'blob'))
 
       - task: PublishBuildArtifacts@1
         displayName: Publish Build Artifacts
@@ -71,7 +75,7 @@ phases:
           ArtifactName: '$(Build.BuildNumber)'
           publishLocation: FilePath
           TargetPath: '$(DropRoot)\$(TeamName)\$(Build.DefinitionName)'
-        condition: and(succeededOrFailed(), in(variables['PB_PublishType'], 'drop', 'blob'))
+        condition: and(succeededOrFailed(), in(variables['_PublishType'], 'drop', 'blob'))
 
       - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
         displayName: Perform Cleanup Tasks
