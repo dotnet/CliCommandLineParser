@@ -1,9 +1,3 @@
-#Your build pipeline references the ‘PB_SignType’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
-#Your build pipeline references a secret variable named ‘PB_PublishBlobFeedKey’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it secret. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references a secret variable named ‘PB_PublishBlobFeedUrl’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it secret. See https://go.microsoft.com/fwlink/?linkid=865972
-#Your build pipeline references the ‘_BuildConfig’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
-#Your build pipeline references the ‘BuildPlatform’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
-
 parameters:
   agentOs: $(agentOs)
   queue: $(queue)
@@ -17,7 +11,7 @@ phases:
     queue: ${{ parameters.queue }}
 
     steps:
-    - ${{ if notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:
+    - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
       - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
         displayName: Install Signing Plugin
         inputs:
@@ -46,7 +40,7 @@ phases:
           BlobFeedKey: $(PB_PublishBlobFeedKey)
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
 
-    - ${{ if notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:
+    - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
       - task: PublishTestResults@1
         displayName: Publish Test Results
         inputs:
