@@ -1,3 +1,8 @@
+variables:
+  ${{ if in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:
+    PB_PublishBlobFeedKey:
+    PB_PublishBlobFeedUrl:
+
 phases:
 - template: /eng/build.yml
   parameters:
@@ -20,8 +25,6 @@ phases:
           ${{ if in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:
             _PublishType: none
             _SignType: test
-            PB_PublishBlobFeedKey:
-            PB_PublishBlobFeedUrl:
           ${{ if notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:
             _PublishType: blob
             _SignType: real
@@ -36,8 +39,8 @@ phases:
         name: DotNetCore-Linux
       ${{ if notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:        
         name: DotNetCore-Test
-      demands:
-        - agent.os -equals Linux
+        demands:
+          - agent.os -equals Linux
       parallel: 2
       matrix:
         Build_Debug:
@@ -49,8 +52,6 @@ phases:
           _PublishType: none
           ${{ if in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:
             _SignType: test
-            PB_PublishBlobFeedKey:
-            PB_PublishBlobFeedUrl:
           ${{ if notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:
             _SignType: real
 
