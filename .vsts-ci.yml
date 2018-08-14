@@ -64,17 +64,17 @@ phases:
             _SignType: test
 
   - template: /eng/build.yml
-      parameters:
-        agentOs: MacOS
-        queue: 
-          name: DotNetCore-Mac
-          parallel: 2
-          matrix:
-            Build_Debug:
-              _BuildConfig: Debug
-              _PublishType: none
-              _SignType: test
-            Build_Release:
-              _BuildConfig: Release
-              _PublishType: none
-              _SignType: test
+    parameters:
+      agentOs: MacOS
+      queue: 
+        name: DotNetCore-Mac
+        parallel: 2
+        matrix:
+          Build_Debug:
+            _BuildConfig: Debug
+            _PublishType: none
+            _SignType: test
+          Build_Release:
+            _BuildConfig: Release
+            _PublishType: none
+            _SignType: test

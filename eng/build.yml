@@ -29,20 +29,24 @@ phases:
                   -configuration %BuildConfig%
                   /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
                   /p:PB_PublishBlobFeedUrl=%BlobFeedUrl%
+                  /p:PB_PublishType=%PublishType%
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
+          PublishType: $(_PublishType)
 
     - ${{ if ne(parameters.agentOs, 'Windows_NT') }}:
       - script: build/cibuild.sh 
                   --configuration $BuildConfig
                   /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
                   /p:PB_PublishBlobFeedUrl=$BlobFeedUrl
+                  /p:PB_PublishType=$PublishType
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
+          PublishType: $(_PublishType)
 
     - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
       - task: PublishTestResults@1
