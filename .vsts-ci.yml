@@ -12,7 +12,7 @@ resources:
 
 variables:
   teamName: Roslyn-Project-System
-  ${{ if in(variables['Build.Reason'], 'PullRequest') }}:
+  ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
     PB_PublishBlobFeedKey:
     PB_PublishBlobFeedUrl:
   ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
@@ -23,7 +23,7 @@ phases:
   parameters:
     agentOs: Windows_NT
     queue:
-      ${{ if in(variables['Build.Reason'], 'PullRequest') }}:
+      ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
         name: Hosted VS2017
       ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
         name: DotNetCore-Build
@@ -31,21 +31,21 @@ phases:
         - agent.os -equals Windows_NT        
       parallel: 2
       matrix:
-        ${{ if in(variables['Build.Reason'], 'PullRequest') }}:
+        ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
           Build_Debug:
             _BuildConfig: Debug
             _PublishType: none
             _SignType: test
         Build_Release:
           _BuildConfig: Release
-          ${{ if in(variables['Build.Reason'], 'PullRequest') }}:
+          ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
             _PublishType: none
             _SignType: test
           ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
             _PublishType: blob
             _SignType: real
 
-- ${{ if in(variables['Build.Reason'], 'PullRequest') }}:
+- ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
   - template: /eng/build.yml
     parameters:
       agentOs: Linux
@@ -65,7 +65,7 @@ phases:
 
   - template: /eng/build.yml
     parameters:
-      agentOs: MacOS
+      agentOs: Darwin
       queue: 
         name: DotNetCore-Mac
         parallel: 2

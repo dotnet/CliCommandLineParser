@@ -7,7 +7,7 @@ phases:
   parameters:
     name: ${{ parameters.agentOs }}
     enableTelemetry: true
-    publicBuildReasons: IndividualCI,BatchedCI,PullRequest
+    publicBuildReasons: PullRequest
     queue: ${{ parameters.queue }}
 
     steps:
