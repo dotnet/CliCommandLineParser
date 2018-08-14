@@ -9,10 +9,15 @@ parameters:
   queue: $(queue)
 
 phases:
-  - phase: ${{ parameters.agentOs }}
+- template: /eng/common/templates/phases/base.yml@arcade  
+  parameters:
+    name: ${{ parameters.agentOs }}
+    enableTelemetry: true
+    publicBuildReasons: IndividualCI,BatchedCI,PullRequest
     queue: ${{ parameters.queue }}
+
     steps:
-    - ${{ if notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:   
+    - ${{ if notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:
       - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
         displayName: Install Signing Plugin
         inputs:
@@ -30,7 +35,7 @@ phases:
           BlobFeedKey: $(PB_PublishBlobFeedKey)
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
 
-    - ${{ if eq(parameters.agentOs, 'Linux') }}:
+    - ${{ if ne(parameters.agentOs, 'Windows_NT') }}:
       - script: build/cibuild.sh 
                   --configuration $BuildConfig
                   /p:PB_PublishBlobFeedKey=$BlobFeedKey
@@ -41,7 +46,7 @@ phases:
           BlobFeedKey: $(PB_PublishBlobFeedKey)
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
 
-    - ${{ if notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:   
+    - ${{ if notIn(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'PullRequest') }}:
       - task: PublishTestResults@1
         displayName: Publish Test Results
         inputs:
