@@ -9,6 +9,11 @@ phases:
     enableTelemetry: true
     publicBuildReasons: PullRequest
     queue: ${{ parameters.queue }}
+    variables: 
+      ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+        _HelixType: build/product
+        _HelixBuildConfig: $(_BuildConfig)
+        _HelixSource: official/dotnet/CliCommandLineParser/$(Build.SourceBranch)
 
     steps:
     - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
