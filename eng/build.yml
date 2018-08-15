@@ -6,7 +6,7 @@ phases:
 - template: /eng/common/templates/phases/base.yml@arcade  
   parameters:
     name: ${{ parameters.agentOs }}
-    enableTelemetry: true
+    enableTelemetry: false
     publicBuildReasons: PullRequest
     queue: ${{ parameters.queue }}
     variables: 
