@@ -1,6 +1,7 @@
 parameters:
-  agentOs: $(agentOs)
-  queue: $(queue)
+  agentOs: ''
+  queue: {}
+  variables: {}
 
 phases:
 - template: /eng/common/templates/phases/base.yml@arcade  
@@ -10,6 +11,7 @@ phases:
     publicBuildReasons: PullRequest
     queue: ${{ parameters.queue }}
     variables: 
+      ${{ insert }}: ${{ parameters.variables }}
       ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
         _HelixType: build/product
         _HelixBuildConfig: $(_BuildConfig)
