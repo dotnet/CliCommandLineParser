@@ -6,7 +6,7 @@ phases:
 - template: /eng/common/templates/phases/base.yml@arcade  
   parameters:
     name: ${{ parameters.agentOs }}
-    enableTelemetry: false
+    enableTelemetry: true
     publicBuildReasons: PullRequest
     queue: ${{ parameters.queue }}
     variables: 
@@ -22,6 +22,12 @@ phases:
         inputs:
           signType: '$(_SignType)'
         condition: and(succeeded(), in(variables['_SignType'], 'real', 'test'))
+      - task: AzureKeyVault@1
+        inputs:
+          azureSubscription: 'HelixProd_KeyVault'
+          KeyVaultName: HelixProdKV
+          SecretsFilter: 'HelixApiAccessToken'
+        condition: always()        
       - task: AzureKeyVault@1
         inputs:
           azureSubscription: 'DotNet-Engineering-Services_KeyVault'

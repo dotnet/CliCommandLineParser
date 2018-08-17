@@ -49,7 +49,6 @@ phases:
   - template: /eng/build.yml
     parameters:
       agentOs: Linux
-      dockerImage: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
       queue: 
         name: DotNetCore-Linux
         parallel: 2
@@ -62,7 +61,8 @@ phases:
             _BuildConfig: Release
             _PublishType: none
             _SignType: test
-
+      variables:
+        _PREVIEW_VSTS_DOCKER_IMAGE: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
   - template: /eng/build.yml
     parameters:
       agentOs: Darwin
