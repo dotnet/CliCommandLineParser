@@ -8,6 +8,7 @@ phases:
   parameters:
     name: ${{ parameters.agentOs }}
     enableTelemetry: true
+    enableMicrobuild: true
     publicBuildReasons: PullRequest
     queue: ${{ parameters.queue }}
     variables: 
@@ -19,11 +20,6 @@ phases:
 
     steps:
     - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
-      - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
-        displayName: Install Signing Plugin
-        inputs:
-          signType: '$(_SignType)'
-        condition: and(succeeded(), in(variables['_SignType'], 'real', 'test'))
       - task: AzureKeyVault@1
         inputs:
           azureSubscription: 'HelixProd_KeyVault'
@@ -93,7 +89,3 @@ phases:
           publishLocation: FilePath
           TargetPath: '$(DropRoot)\$(TeamName)\$(Build.DefinitionName)'
         condition: and(succeededOrFailed(), in(variables['_PublishType'], 'drop', 'blob'))
-
-      - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
-        displayName: Perform Cleanup Tasks
-        condition: always()
