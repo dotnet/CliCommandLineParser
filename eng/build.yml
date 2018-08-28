@@ -13,9 +13,11 @@ phases:
     queue: ${{ parameters.queue }}
     variables: 
       ${{ insert }}: ${{ parameters.variables }}
+      _HelixType: build/product
+      _HelixBuildConfig: $(_BuildConfig)
+      ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+        _HelixSource: pr/dotnet/CliCommandLineParser/$(Build.SourceBranch)
       ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
-        _HelixType: build/product
-        _HelixBuildConfig: $(_BuildConfig)
         _HelixSource: official/dotnet/CliCommandLineParser/$(Build.SourceBranch)
 
     steps:
