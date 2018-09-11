@@ -8,7 +8,8 @@ phases:
   parameters:
     name: ${{ parameters.agentOs }}
     enableTelemetry: true
-    enableMicrobuild: true
+    # Set to true when the internal project is moved to dnceng
+    enableMicrobuild: false
     publicBuildReasons: PullRequest
     queue: ${{ parameters.queue }}
     variables: 
@@ -21,6 +22,19 @@ phases:
         _HelixSource: official/dotnet/CliCommandLineParser/$(Build.SourceBranch)
 
     steps:
+    # This step can be removed when the internal project is moved to dnceng and 'enableMicrobuild' is set to 'true'
+    - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+      - task: MicroBuildSigningPlugin@1
+        displayName: Install MicroBuild plugin
+        inputs:
+          signType: $(_SignType)
+          zipSources: false
+          feedSource: https://devdiv.pkgs.visualstudio.com/_packaging/MicroBuildToolset/nuget/v3/index.json
+        env:
+          TeamName: $(_TeamName)
+        continueOnError: false
+        condition: and(succeeded(), in(variables['_SignType'], 'real', 'test'), eq(variables['Agent.Os'], 'Windows_NT'))
+
     - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
       - task: AzureKeyVault@1
         inputs:
@@ -91,3 +105,11 @@ phases:
           publishLocation: FilePath
           TargetPath: '$(DropRoot)\$(TeamName)\$(Build.DefinitionName)'
         condition: and(succeededOrFailed(), in(variables['_PublishType'], 'drop', 'blob'))
+
+    # This step can be removed when the internal project is moved to dnceng and 'enableMicrobuild' is set to 'true'
+    - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      - task: MicroBuildCleanup@1
+        displayName: Execute Microbuild cleanup tasks  
+        condition: and(always(), in(variables['_SignType'], 'real', 'test'), eq(variables['Agent.Os'], 'Windows_NT'))
+        env:
+          TeamName: $(_TeamName)
