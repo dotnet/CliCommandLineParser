@@ -1,15 +1,6 @@
 trigger:
 - master
 
-resources:
-  repositories:
-  # shared library repository
-  - repository: arcade
-    type: github
-    endpoint: DotNet-Bot GitHub Connection
-    name: dotnet/arcade
-    ref: refs/heads/master
-
 variables:
   teamName: Roslyn-Project-System
   ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
