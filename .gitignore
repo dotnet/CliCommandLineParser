@@ -1,33 +1,22 @@
-*.DotSettings
-*.lnk
-*.log
-*.ncrunchproject
-*.ncrunchsolution
-*.nupkg
-*.psess
-*.ReSharper
-*.suo
-*.Tests/lib/
-*.user
-*.userprefs
-*.vsp
-*.xml
-.dotnet
-.nuget
-._.DS_Store
-.DS_Store
-.idea
-.vs
-.vscode
-/.stfolder
-/.stignore
-_NCrunch_*/
-_ReSharper.*/
-Artifacts
+###############################################################################
+# Build Artifacts
+###############################################################################
+artifacts/
 bin/
-Bin/
-buildlog.txt
-nCrunchTemp*
 obj/
-packages/
-TestResults/
+
+###############################################################################
+# Visual Studio
+###############################################################################
+.vs/
+.dotnet/
+.tools/
+.packages/
+
+# OS X Device Services Store
+.DS_Store
+
+# Performance tests GIT source
+.perftestsource/
+
+*.binlog
