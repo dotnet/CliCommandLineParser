@@ -47,7 +47,7 @@ phases:
         condition: succeeded()
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-      - script: build\CIBuild.cmd 
+      - script: eng\common\CIBuild.cmd 
                   -configuration %BuildConfig%
                   $(_PublishArgs)
                   $(_SignArgs)
@@ -59,7 +59,7 @@ phases:
           PublishType: $(_PublishType)
 
     - ${{ if ne(parameters.agentOs, 'Windows_NT') }}:
-      - script: build/cibuild.sh 
+      - script: eng/common/cibuild.sh 
                   --configuration $BuildConfig
                   $(_PublishArgs)
                   $(_SignArgs)

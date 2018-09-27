@@ -8,6 +8,6 @@ A second-generation parser for the .NET Core command line tools.
 |:------:|
 | [![][win-x64-build-badge]][win-x64-build] |
 
-[win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5619/badge
-[win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=5619
+[win-x64-build-badge]: https://dnceng.visualstudio.com/internal/_apis/build/status/dotnet/cliCommandLineParser/cliCommandLineParser%203.0%20(Windows)%20(YAML)%20(Official)
+[win-x64-build]: https://dnceng.visualstudio.com/internal/_build?definitionId=143
 
