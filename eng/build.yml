@@ -17,8 +17,19 @@ phases:
       _HelixBuildConfig: $(_BuildConfig)
       ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
         _HelixSource: pr/dotnet/CliCommandLineParser/$(Build.SourceBranch)
+        _OfficialBuildIdArgs: ''
+        _PublishArgs: ''
+        _SignArgs: ''
       ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
         _HelixSource: official/dotnet/CliCommandLineParser/$(Build.SourceBranch)
+        _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+        _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+                  /p:DotNetPublishBlobFeedUrl=$(PB_PublishBlobFeedUrl)
+                  /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
+                  /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+                  /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
+                  /p:PB_PublishType=$(_PublishType)
+        _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
 
     steps:
     - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
@@ -32,15 +43,15 @@ phases:
         inputs:
           azureSubscription: 'DotNet-Engineering-Services_KeyVault'
           KeyVaultName: EngKeyVault
-          SecretsFilter: 'dotnetfeed-storage-access-key-1'
+          SecretsFilter: 'dotnetfeed-storage-access-key-1,microsoft-symbol-server-pat,symweb-symbol-server-pat'
         condition: succeeded()
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-      - script: build\CIBuild.cmd 
+      - script: eng\common\CIBuild.cmd 
                   -configuration %BuildConfig%
-                  /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
-                  /p:PB_PublishBlobFeedUrl=%BlobFeedUrl%
-                  /p:PB_PublishType=%PublishType%
+                  $(_PublishArgs)
+                  $(_SignArgs)
+                  $(_OfficialBuildIdArgs)
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
@@ -48,11 +59,11 @@ phases:
           PublishType: $(_PublishType)
 
     - ${{ if ne(parameters.agentOs, 'Windows_NT') }}:
-      - script: build/cibuild.sh 
+      - script: eng/common/cibuild.sh 
                   --configuration $BuildConfig
-                  /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
-                  /p:PB_PublishBlobFeedUrl=$BlobFeedUrl
-                  /p:PB_PublishType=$PublishType
+                  $(_PublishArgs)
+                  $(_SignArgs)
+                  $(_OfficialBuildIdArgs)
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
@@ -64,8 +75,7 @@ phases:
         displayName: Publish Test Results
         inputs:
           testRunner: XUnit
-          testResultsFiles: '**\*.xml'
-          searchFolder: '$(Build.SourcesDirectory)\artifacts\$(_BuildConfig)\TestResults'
+          testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'
           testRunTitle: 'Unit Test Results'
           platform: '$(BuildPlatform)'
           configuration: '$(_BuildConfig)'
@@ -76,17 +86,17 @@ phases:
         inputs:
           SourceFolder: '$(Build.SourcesDirectory)'
           Contents: |
-           artifacts\$(_BuildConfig)\bin\**\*
-           artifacts\$(_BuildConfig)\log\**\*
-           artifacts\$(_BuildConfig)\packages\**\*
-           artifacts\$(_BuildConfig)\TestResults\**\*
+           artifacts\bin\$(_BuildConfig)\**\*
+           artifacts\log\$(_BuildConfig)\**\*
+           artifacts\packages\$(_BuildConfig)\**\*
+           artifacts\TestResults\$(_BuildConfig)\**\*
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
         condition: and(succeededOrFailed(), in(variables['_PublishType'], 'drop', 'blob'))
 
       - task: PublishBuildArtifacts@1
         displayName: Publish Build Artifacts
         inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)\artifacts\$(_BuildConfig)'
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)\artifacts'
           ArtifactName: '$(Build.BuildNumber)'
           publishLocation: FilePath
           TargetPath: '$(DropRoot)\$(TeamName)\$(Build.DefinitionName)'

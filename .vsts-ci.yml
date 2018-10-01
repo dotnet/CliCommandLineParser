@@ -6,8 +6,10 @@ variables:
   ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
     PB_PublishBlobFeedKey:
     PB_PublishBlobFeedUrl:
+    _DotNetPublishToBlobFeed: false
   ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
     PB_PublishBlobFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+    _DotNetPublishToBlobFeed: true
 
 phases:
 - template: /eng/build.yml
@@ -17,7 +19,7 @@ phases:
       ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
         name: Hosted VS2017
       ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
-        name: DotNetCore-Build
+        name: DotNetCore-Windows
         demands:
         - agent.os -equals Windows_NT        
       parallel: 2
@@ -54,6 +56,7 @@ phases:
             _SignType: test
       variables:
         _PREVIEW_VSTS_DOCKER_IMAGE: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
+
   - template: /eng/build.yml
     parameters:
       agentOs: Darwin

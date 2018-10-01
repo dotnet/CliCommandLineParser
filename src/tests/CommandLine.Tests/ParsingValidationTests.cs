@@ -106,10 +106,11 @@ namespace Microsoft.DotNet.Cli.CommandLine.Tests
                                   ZeroOrMoreArguments()
                                       .LegalFilePathsOnly());
 
-            var invalidCharacters = $"|{Path.GetInvalidPathChars().First()}|";
+            // The NULL character is really the only invalid character that we check now in the FileInfo API.
+            var invalidCharacters = $"|\0|";
 
             // Convert to ushort so the xUnit XML writer doesn't complain about invalid characters
-            output.WriteLine(string.Join("\n", Path.GetInvalidPathChars().Select((c) => (ushort)(c))));
+            output.WriteLine(string.Join("\n", invalidCharacters.Select((c) => (ushort)(c))));
 
             var result = command.Parse($"the-command {invalidCharacters}");
 
