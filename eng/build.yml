@@ -41,9 +41,9 @@ phases:
         condition: always()        
       - task: AzureKeyVault@1
         inputs:
-          azureSubscription: 'DotNet-Engineering-Services_KeyVault,microsoft-symbol-server-pat,symweb-symbol-server-pat'
+          azureSubscription: 'DotNet-Engineering-Services_KeyVault'
           KeyVaultName: EngKeyVault
-          SecretsFilter: 'dotnetfeed-storage-access-key-1'
+          SecretsFilter: 'dotnetfeed-storage-access-key-1,microsoft-symbol-server-pat,symweb-symbol-server-pat'
         condition: succeeded()
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
