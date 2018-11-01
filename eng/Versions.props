@@ -9,7 +9,7 @@
   <!-- Repo Version Information -->
   <PropertyGroup>
     <VersionBase>0.2.1</VersionBase>
-    <PreReleaseVersionLabel>alpha</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
   </PropertyGroup>
 
   <!-- Repo Toolset Features -->
