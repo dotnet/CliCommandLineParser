@@ -8,6 +8,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
+    <IsShippingPackage>false</IsShippingPackage>
     <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
