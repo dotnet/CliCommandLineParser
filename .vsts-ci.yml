@@ -3,13 +3,16 @@ trigger:
 
 variables:
   teamName: Roslyn-Project-System
+  _DotNetArtifactsCategory: .NETCore
   ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
     PB_PublishBlobFeedKey:
     PB_PublishBlobFeedUrl:
+    _PublishUsingPipelines: false
     _DotNetPublishToBlobFeed: false
   ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
     PB_PublishBlobFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
     _DotNetPublishToBlobFeed: true
+    _PublishUsingPipelines: true
 
 phases:
 - template: /eng/build.yml
@@ -76,6 +79,7 @@ phases:
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: /eng/common/templates/phases/publish-build-assets.yml
     parameters:
+      publishUsingPipelines: true
       dependsOn:
         - Windows_NT
       queue:
