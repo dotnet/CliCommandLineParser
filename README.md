@@ -1,6 +1,8 @@
 # Microsoft.DotNet.Cli.CommandLine
 
-A second-generation parser for the .NET Core command line tools.
+The command line parser currently used by the [.NET CLI](https://docs.microsoft.com/en-us/dotnet/core/tools/?tabs=netcore2x).
+
+*Note:* For general use, we recommend [System.CommandLine](https://github.com/dotnet/command-line-api) over this library.
 
 ## Build Status
 
