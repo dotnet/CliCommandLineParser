@@ -1,9 +1,7 @@
 variables:
-  - group: AzureDevOps-Artifact-Feeds-Pats
-  - group: DotNet-Blob-Feed
+  - group: Publish-Build-Assets
   - group: DotNet-DotNetCli-Storage
   - group: DotNet-MSRC-Storage
-  - group: Publish-Build-Assets
 
   # .NET Core 3.1 Dev
   - name: PublicDevRelease_31_Channel_Id
@@ -46,7 +44,7 @@ variables:
     value: 529
 
   # .NET Core 3.1 Blazor Features
-  - name: NetCore_31_Blazor_Features_Channel_Id
+  - name: NetCore_31_Blazor_Features
     value: 531
 
   # Whether the build is internal or not

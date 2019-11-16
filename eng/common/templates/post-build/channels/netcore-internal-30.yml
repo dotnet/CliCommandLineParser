@@ -1,29 +1,21 @@
 parameters:
-  artifactsPublishingAdditionalParameters: ''
-  dependsOn:
-  - Validate
   publishInstallersAndChecksums: false
   symbolPublishingAdditionalParameters: ''
-  stageName: ''
-  channelName: ''
-  channelId: ''
-  transportFeed: ''
-  shippingFeed: ''
-  symbolsFeed: ''
+  artifactsPublishingAdditionalParameters: ''
 
 stages:
-- stage: ${{ parameters.stageName }}
-  dependsOn: ${{ parameters.dependsOn }}
+- stage: NetCore_30_Internal_Servicing_Publishing
+  dependsOn: validate
   variables:
     - template: ../common-variables.yml
-  displayName: ${{ parameters.channelName }} Publishing
+  displayName: .NET Core 3.0 Internal Servicing Publishing
   jobs:
   - template: ../setup-maestro-vars.yml
 
-  - job: publish_symbols
+  - job:
     displayName: Symbol Publishing
     dependsOn: setupMaestroVars
-    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', ${{ parameters.channelId }} ))
+    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.InternalServicing_30_Channel_Id))
     variables:
       - group: DotNet-Symbol-Server-Pats
     pool:
@@ -41,18 +33,6 @@ stages:
           artifactName: 'PDBArtifacts'
         continueOnError: true
 
-      # This is necessary whenever we want to publish/restore to an AzDO private feed
-      # Since sdk-task.ps1 tries to restore packages we need to do this authentication here
-      # otherwise it'll complain about accessing a private feed.
-      - task: NuGetAuthenticate@0
-        displayName: 'Authenticate to AzDO Feeds'
-
-      - task: PowerShell@2
-        displayName: Enable cross-org publishing
-        inputs:
-          filePath: eng\common\enable-cross-org-publishing.ps1
-          arguments: -token $(dn-bot-dnceng-artifact-feeds-rw)
-
       - task: PowerShell@2
         displayName: Publish
         inputs:
@@ -66,21 +46,17 @@ stages:
             /p:Configuration=Release
             ${{ parameters.symbolPublishingAdditionalParameters }}
 
-      - template: ../../steps/publish-logs.yml
-        parameters:
-          StageLabel: '${{ parameters.stageName }}'
-          JobLabel: 'SymbolPublishing'
-
-
   - job: publish_assets
     displayName: Publish Assets
     dependsOn: setupMaestroVars
     variables:
+      - group: DotNet-Blob-Feed
+      - group: AzureDevOps-Artifact-Feeds-Pats
       - name: BARBuildId
         value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.BARBuildId'] ]
       - name: IsStableBuild
         value: $[ dependencies.setupMaestroVars.outputs['setReleaseVars.IsStableBuild'] ]
-    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', ${{ parameters.channelId }}))
+    condition: contains(dependencies.setupMaestroVars.outputs['setReleaseVars.InitialChannels'], format('[{0}]', variables.InternalServicing_30_Channel_Id))
     pool:
       vmImage: 'windows-2019'
     steps:
@@ -89,14 +65,12 @@ stages:
         inputs:
           buildType: current
           artifactName: PackageArtifacts
-        continueOnError: true
 
       - task: DownloadBuildArtifacts@0
         displayName: Download Blob Artifacts
         inputs:
           buildType: current
           artifactName: BlobArtifacts
-        continueOnError: true
 
       - task: DownloadBuildArtifacts@0
         displayName: Download Asset Manifests
@@ -122,7 +96,6 @@ stages:
         inputs:
           filePath: eng\common\sdk-task.ps1
           arguments: -task PublishArtifactsInManifest -restore -msbuildEngine dotnet
-            /p:ArtifactsCategory=$(_DotNetArtifactsCategory)
             /p:IsStableBuild=$(IsStableBuild)
             /p:IsInternalBuild=$(IsInternalBuild)
             /p:RepositoryName=$(Build.Repository.Name)
@@ -137,24 +110,21 @@ stages:
             /p:BlobBasePath='$(Build.ArtifactStagingDirectory)/BlobArtifacts/'
             /p:PackageBasePath='$(Build.ArtifactStagingDirectory)/PackageArtifacts/'
             /p:Configuration=Release
-            /p:PublishInstallersAndChecksums=${{ parameters.publishInstallersAndChecksums }}
-            /p:InstallersTargetStaticFeed=$(InstallersBlobFeedUrl)
-            /p:InstallersAzureAccountKey=$(dotnetcli-storage-key)
-            /p:ChecksumsTargetStaticFeed=$(ChecksumsBlobFeedUrl)
-            /p:ChecksumsAzureAccountKey=$(dotnetclichecksums-storage-key)
-            /p:AzureDevOpsStaticShippingFeed='${{ parameters.shippingFeed }}'
+            /p:PublishInstallersAndChecksums=true
+            /p:ChecksumsTargetStaticFeed=$(InternalChecksumsBlobFeedUrl)
+            /p:ChecksumsAzureAccountKey=$(InternalChecksumsBlobFeedKey)
+            /p:InstallersTargetStaticFeed=$(InternalInstallersBlobFeedUrl)
+            /p:InstallersAzureAccountKey=$(InternalInstallersBlobFeedKey)
+            /p:PublishToAzureDevOpsNuGetFeeds=true
+            /p:AzureDevOpsStaticShippingFeed='https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3-internal/nuget/v3/index.json'
             /p:AzureDevOpsStaticShippingFeedKey='$(dn-bot-dnceng-artifact-feeds-rw)'
-            /p:AzureDevOpsStaticTransportFeed='${{ parameters.transportFeed }}'
+            /p:AzureDevOpsStaticTransportFeed='https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3-internal-transport/nuget/v3/index.json'
             /p:AzureDevOpsStaticTransportFeedKey='$(dn-bot-dnceng-artifact-feeds-rw)'
-            /p:AzureDevOpsStaticSymbolsFeed='${{ parameters.symbolsFeed }}'
+            /p:AzureDevOpsStaticSymbolsFeed='https://pkgs.dev.azure.com/dnceng/_packaging/dotnet3-internal-symbols/nuget/v3/index.json'
             /p:AzureDevOpsStaticSymbolsFeedKey='$(dn-bot-dnceng-artifact-feeds-rw)'
+            /p:PublishToMSDL=false
             ${{ parameters.artifactsPublishingAdditionalParameters }}
-
-      - template: ../../steps/publish-logs.yml
-        parameters:
-          StageLabel: '${{ parameters.stageName }}'
-          JobLabel: 'AssetsPublishing'
 
       - template: ../../steps/promote-build.yml
         parameters:
-          ChannelId: ${{ parameters.channelId }}
+          ChannelId: ${{ variables.InternalServicing_30_Channel_Id }}
