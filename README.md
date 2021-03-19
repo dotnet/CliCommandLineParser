@@ -6,7 +6,7 @@ The command line parser currently used by the [.NET CLI](https://docs.microsoft.
 
 ## Build Status
 
-| Latest Daily Build<br>*master* |
+| Latest Daily Build<br>*main* |
 |:------:|
 | [![][win-x64-build-badge]][win-x64-build] |
 
