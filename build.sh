@@ -8,4 +8,7 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 ScriptRoot="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
+# install the 2.1.0 runtime for running tests
+"$ScriptRoot/eng/common/dotnet-install.sh"  -runtime dotnet -version 2.1.0
+
 . "$ScriptRoot/eng/common/build.sh" --build --restore $@

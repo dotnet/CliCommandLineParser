@@ -16,7 +16,7 @@
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <DotNetCliProjectJsonVersion>1.0.0-preview2-1-003177</DotNetCliProjectJsonVersion>
-    <VSWhereVersion>2.2.7</VSWhereVersion>
+    <VSWhereVersion>2.6.7</VSWhereVersion>
   </PropertyGroup>
   <!-- Test Dependencies -->
   <PropertyGroup>

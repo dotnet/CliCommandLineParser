@@ -3,7 +3,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <IsShipping>false</IsShipping>
   </PropertyGroup>
@@ -17,8 +17,7 @@
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
     <PackageReference Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />
-    <PackageReference Include="xunit" Version="$(XUnitVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XUnitRunnerVisualStudioVersion)" />
+    <PackageReference Include="xunit.core" Version="$(XUnitVersion)" />
   </ItemGroup>
 
   <ItemGroup>
