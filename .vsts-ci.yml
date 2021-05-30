@@ -65,7 +65,7 @@ phases:
     parameters:
       agentOs: Darwin
       queue: 
-        name: DotNetCore-Mac
+        name: Hosted macOS
         parallel: 2
         matrix:
           Build_Debug:
