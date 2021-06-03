@@ -16,4 +16,4 @@ scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
 # install the 2.1.0 runtime for running tests
 "$scriptroot/common/dotnet-install.sh"  -runtime dotnet -version 2.1.0
 
-. "$scriptroot/common/build.sh" --restore --build --test --pack --publish --ci $@
+. "$scriptroot/common/cibuild.sh" --restore --build --test --pack --publish --ci $@
