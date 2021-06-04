@@ -42,6 +42,21 @@ phases:
             _PublishType: blob
             _SignType: real
 
+- template: /eng/common/templates/jobs/jobs.yml
+  parameters:
+    agentOs: Linux_Source_Build
+    queue:
+      name: DotNetCore-Linux
+      parallel: 2
+      matrix:
+        Build_Release:
+          _BuildConfig: Release
+          _PublishType: none
+          _SignType: real
+    variables:
+      _PREVIEW_VSTS_DOCKER_IMAGE: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
+    enableSourceBuild: true
+
 - ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
   - template: /eng/build.yml
     parameters:
@@ -65,7 +80,7 @@ phases:
     parameters:
       agentOs: Darwin
       queue: 
-        name: DotNetCore-Mac
+        name: Hosted macOS
         parallel: 2
         matrix:
           Build_Debug:

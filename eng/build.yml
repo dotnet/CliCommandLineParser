@@ -61,7 +61,7 @@ phases:
           PublishType: $(_PublishType)
 
     - ${{ if ne(parameters.agentOs, 'Windows_NT') }}:
-      - script: eng/common/cibuild.sh 
+      - script: eng/cibuild.sh
                   --configuration $BuildConfig
                   $(_PublishArgs)
                   $(_SignArgs)
