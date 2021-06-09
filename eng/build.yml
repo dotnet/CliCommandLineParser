@@ -1,46 +1,50 @@
 parameters:
   agentOs: ''
-  queue: {}
-  variables: {}
+  pool: {}
+  strategy: ''
+  _PREVIEW_VSTS_DOCKER_IMAGE: ''
 
-phases:
-- template: /eng/common/templates/phases/base.yml
+jobs:
+- template: /eng/common/templates/job/job.yml
   parameters:
     name: ${{ parameters.agentOs }}
     enableTelemetry: true
     enableMicrobuild: true
-    publicBuildReasons: PullRequest
-    queue: ${{ parameters.queue }}
+    pool: ${{ parameters.pool }}
+    strategy: ${{ parameters.strategy }}
     variables: 
-      ${{ insert }}: ${{ parameters.variables }}
-      _HelixType: build/product
-      _HelixBuildConfig: $(_BuildConfig)
-      ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
-        _HelixSource: pr/dotnet/CliCommandLineParser/$(Build.SourceBranch)
-        _OfficialBuildIdArgs: ''
-        _PublishArgs: ''
-        _SignArgs: ''
-      ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
-        _HelixSource: official/dotnet/CliCommandLineParser/$(Build.SourceBranch)
-        _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
-        _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
-                  /p:DotNetPublishBlobFeedUrl=$(PB_PublishBlobFeedUrl)
-                  /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
-                  /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
-                  /p:DotNetArtifactsCategory=$(_DotNetArtifactsCategory)
-                  /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
-                  /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
-                  /p:PB_PublishType=$(_PublishType)
-        _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
+      - _PREVIEW_VSTS_DOCKER_IMAGE: ${{ parameters._PREVIEW_VSTS_DOCKER_IMAGE }}
+      - _HelixType: build/product
+      - _HelixBuildConfig: $(_BuildConfig)
+      - _WindowsAssestManifestName: Windows_NT-AnyCPU.xml
+      - ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+        - _HelixSource: pr/dotnet/CliCommandLineParser/$(Build.SourceBranch)
+        - _OfficialBuildIdArgs: ''
+        - _PublishArgs: ''
+        - _SignArgs: ''
+      - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+        - _HelixSource: official/dotnet/CliCommandLineParser/$(Build.SourceBranch)
+        - _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+        - _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+                        /p:DotNetPublishBlobFeedUrl=$(PB_PublishBlobFeedUrl)
+                        /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
+                        /p:DotNetPublishUsingPipelines=$(_PublishUsingPipelines)
+                        /p:DotNetArtifactsCategory=$(_DotNetArtifactsCategory)
+                        /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+                        /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
+                        /p:PB_PublishType=$(_PublishType)
+        - _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
 
     steps:
+    - checkout: self
+      clean: true
     - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
       - task: AzureKeyVault@1
         inputs:
           azureSubscription: 'HelixProd_KeyVault'
           KeyVaultName: HelixProdKV
           SecretsFilter: 'HelixApiAccessToken'
-        condition: always()        
+        condition: always()
       - task: AzureKeyVault@1
         inputs:
           azureSubscription: 'DotNet-Engineering-Services_KeyVault'
@@ -49,7 +53,7 @@ phases:
         condition: succeeded()
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-      - script: eng\common\CIBuild.cmd 
+      - script: eng\CIBuild.cmd
                   -configuration %BuildConfig%
                   $(_PublishArgs)
                   $(_SignArgs)

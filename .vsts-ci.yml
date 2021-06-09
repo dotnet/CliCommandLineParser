@@ -15,18 +15,19 @@ variables:
     _DotNetPublishToBlobFeed: true
     _PublishUsingPipelines: true
 
-phases:
+jobs:
 - template: /eng/build.yml
   parameters:
     agentOs: Windows_NT
-    queue:
+    pool:
       ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
         name: Hosted VS2017
       ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
-        name: DotNetCore-Windows
+        name: NetCoreInternal-Pool
+        queue: BuildPool.Server.Amd64.VS2017
         demands:
-        - agent.os -equals Windows_NT        
-      parallel: 2
+        - agent.os -equals Windows_NT
+    strategy:
       matrix:
         ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
           Build_Debug:
@@ -42,28 +43,19 @@ phases:
             _PublishType: blob
             _SignType: real
 
-- template: /eng/common/templates/jobs/jobs.yml
+- template: /eng/common/templates/job/source-build.yml
   parameters:
-    agentOs: Linux_Source_Build
-    queue:
-      name: DotNetCore-Linux
-      parallel: 2
-      matrix:
-        Build_Release:
-          _BuildConfig: Release
-          _PublishType: none
-          _SignType: real
-    variables:
-      _PREVIEW_VSTS_DOCKER_IMAGE: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
-    enableSourceBuild: true
+    platform:
+      name: Managed
+      container: mcr.microsoft.com/dotnet-buildtools/prereqs:centos-7-3e800f1-20190501005343
 
 - ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
   - template: /eng/build.yml
     parameters:
       agentOs: Linux
-      queue: 
+      pool: 
         name: DotNetCore-Linux
-        parallel: 2
+      strategy:
         matrix:
           Build_Debug:
             _BuildConfig: Debug
@@ -73,15 +65,14 @@ phases:
             _BuildConfig: Release
             _PublishType: none
             _SignType: test
-      variables:
-        _PREVIEW_VSTS_DOCKER_IMAGE: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
+      _PREVIEW_VSTS_DOCKER_IMAGE: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
 
   - template: /eng/build.yml
     parameters:
       agentOs: Darwin
-      queue: 
+      pool: 
         name: Hosted macOS
-        parallel: 2
+      strategy:
         matrix:
           Build_Debug:
             _BuildConfig: Debug
@@ -93,10 +84,11 @@ phases:
             _SignType: test
 
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-  - template: /eng/common/templates/phases/publish-build-assets.yml
+  - template: /eng/common/templates/job/publish-build-assets.yml
     parameters:
       publishUsingPipelines: true
       dependsOn:
         - Windows_NT
-      queue:
+        - Source_Build_Managed
+      pool:
         name: Hosted VS2017
