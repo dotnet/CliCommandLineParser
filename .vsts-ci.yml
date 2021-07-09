@@ -65,7 +65,7 @@ jobs:
             _BuildConfig: Release
             _PublishType: none
             _SignType: test
-      _PREVIEW_VSTS_DOCKER_IMAGE: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
+      _PREVIEW_VSTS_DOCKER_IMAGE: mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
 
   - template: /eng/build.yml
     parameters:
