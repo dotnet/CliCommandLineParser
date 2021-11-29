@@ -1,6 +1,6 @@
 # Microsoft.DotNet.Cli.CommandLine
 
-The command line parser currently used by the [.NET CLI](https://docs.microsoft.com/en-us/dotnet/core/tools/?tabs=netcore2x).
+The command line parser currently used by the [.NET CLI](https://docs.microsoft.com/en-us/dotnet/core/tools/?tabs=netcore2x) in older versions of the .NET SDK.  Starting in 6.0.100, all versions have moved over to System.CommandLine listed below.
 
 *Note:* For general use, we recommend [System.CommandLine](https://github.com/dotnet/command-line-api) over this library.
 
